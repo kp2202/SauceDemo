@@ -36,12 +36,31 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run Playwright tests on Chromium
+        env:
+          PLAYWRIGHT_PROJECT: chromium
         run: npx playwright test --project=chromium --reporter=list
+
+      - name: Generate AI summary
+        if: always()
+        env:
+          PLAYWRIGHT_PROJECT: chromium
+          BUILD_TYPE: development
+        run: node scripts/ci-ai-summary.js
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-chromium
-          path: playwright-report/
+          path: |
+            playwright-report/
+            !playwright-report/index.html
+          if-no-files-found: ignore
+
+      - name: Upload AI summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-summary-chromium
+          path: playwright-report/ai-summary.md
           if-no-files-found: ignore
