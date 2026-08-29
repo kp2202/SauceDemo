@@ -8,8 +8,49 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  pr-check:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      CI: true
+      BUILD_TYPE: development
+      BASE_URL: https://www.saucedemo.com
+      STANDARD_USER: standard_user
+      STANDARD_PASSWORD: secret_sauce
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npx playwright test --project=chromium --reporter=list
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-pr
+          path: playwright-report/
+          if-no-files-found: ignore
+
+  matrix-check:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -37,10 +78,10 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.browser }} --reporter=list
 
       - name: Upload Playwright report
         if: always()
