@@ -6,14 +6,25 @@
     "test": "playwright test",
     "test:staging": "cross-env BUILD_TYPE=staging playwright test",
     "test:prod": "cross-env BUILD_TYPE=production playwright test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "ai:generate-tests": "ts-node scripts/generate-tests.ts",
+    "ci:prioritize": "ts-node scripts/prioritize-tests.ts",
+    "ci:metrics": "ts-node scripts/test-metrics.ts",
+    "ci:reset-db": "ts-node scripts/reset-metrics-db.ts",
+    "test:with-metrics": "npm test && npm run ci:metrics"
+  },
+  "dependencies": {
+    "langchain": "^0.1.0",
+    "openai": "^4.52.0",
+    "sql.js": "^1.14.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
     "@types/node": "^20.0.0",
     "cross-env": "^10.0.0",
     "dotenv": "^17.4.2",
-    "prettier": "^3.9.6"
+    "prettier": "^3.9.6",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.3.0"
   }
 }
-  
